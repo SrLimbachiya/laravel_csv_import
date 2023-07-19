@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Jobs\ProcessCsvFile;
 use App\Models\TempModel;
 use http\Client\Response;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use League\Csv\Reader;
@@ -23,6 +25,16 @@ class UploadController extends Controller
     }
 
 
+    public function getBranches() {
+        ini_set("memory_limit", "-1");
+        set_time_limit(0);
+        $data = DB::table('Master')
+            ->distinct('department')
+            ->pluck('department');
+
+        return ['data' => $data];
+    }
+
 
     public function processUpload(Request $request)
     {
@@ -36,7 +48,6 @@ class UploadController extends Controller
                 $reader = Reader::createFromPath(public_path('csv_upload') . "/test.csv", 'r');
                 $records = $reader->getRecords();
 
-
                 $dataToInsert = [];
 
                 $counter = 0;
@@ -44,6 +55,10 @@ class UploadController extends Controller
                     if ($counter === 0 || $record[0] == '') {
                         $counter++;
                         continue;
+                    }
+
+                    foreach ($record as &$value) {
+                        $value = iconv(mb_detect_encoding($value), 'UTF-8//IGNORE', $value);
                     }
 
                     $dataToInsert = [

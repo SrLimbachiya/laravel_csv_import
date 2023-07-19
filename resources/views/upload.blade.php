@@ -475,15 +475,20 @@
     </style>
 </head>
 <body>
+<main class="text-center">
+    <div id="backDrop" style="display: none">
+    </div>
+    <h1>Upload a CSV File</h1>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput">
+        <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+    </form>
 
-<div id="backDrop" style="display: none">
-</div>
-<h1>Upload a CSV File</h1>
-<form id="upload-form" method="POST" enctype="multipart/form-data">
-    <input type="file" name="file" id="fileInput">
-    <button type="submit">Upload</button>
-</form>
 
+    <button id="getBranches" class="btn btn-secondary btn-sm">Load Branches</button>
+    <div id="dataShow"></div>
+
+</main>
 <div id="blocksAnim" style="z-index: 1000; display: none;">
     <div class="tower">
         <div class="tower__group">
@@ -775,6 +780,8 @@
 
 <!-- Your other HTML content here -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" integrity="sha512-t4GWSVZO1eC8BM339Xd7Uphw5s17a86tIZIj8qRxhnKub6WoyhnrxeCIMeAqBPgdZGlCcG2PrZjMc+Wr78+5Xg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js" integrity="sha512-3dZ9wIrMMij8rOH7X3kLfXAzwtcHpuYpEgQg1OA4QAob1e81H8ntUQmQm3pBudqIoySO5j0tHN4ENzA6+n2r4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     $(document).ready(function () {
         $('#upload-form').submit(function (e) {
@@ -811,31 +818,35 @@
                 }
             });
         });
+
+
+
+
+        $('#getBranches').on('click', function () {
+            console.log('clicked');
+            $.ajax({
+                type: 'GET',
+                url: '{{ route("branches") }}',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    // Handle the success response here
+                    console.log(response);
+                    $('#backDrop').hide();
+                    $('#blocksAnim').hide();
+                },
+                error: function (error) {
+                    // Handle the error response here
+                    console.log(error.responseJSON);
+                    $('#backDrop').hide();
+                    $('#blocksAnim').hide();
+                }
+            });
+        });
+
+
     });
 </script>
-
-
-@if (isset($data))
-    <table>
-        <thead>
-        <tr>
-            @foreach ($data[0] as $header)
-                <th>{{ $header }}</th>
-            @endforeach
-        </tr>
-        </thead>
-        <tbody>
-        @for ($i = 1; $i < count($data); $i++)
-            <tr>
-                @foreach ($data[$i] as $value)
-                    <td>{{ $value }}</td>
-                @endforeach
-            </tr>
-        @endfor
-        </tbody>
-    </table>
-@endif
-
 
 
 @if (session('success'))

@@ -24,6 +24,8 @@ Route::get('/upload', [UploadController::class, 'index']);
 
 Route::post('/upload/process', [UploadController::class, 'processUpload'])->name('upload.process');
 
+Route::get('/branches', [UploadController::class, 'getBranches'])->name('branches');
+
 
 
 
