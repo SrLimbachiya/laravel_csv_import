@@ -35,16 +35,18 @@ class UploadController extends Controller
                 $storePath = $file->move(public_path('csv_upload'), 'test.csv');
                 $reader = Reader::createFromPath(public_path('csv_upload') . "/test.csv", 'r');
                 $records = $reader->getRecords();
+
+
                 $dataToInsert = [];
 
                 $counter = 0;
                 foreach ($records as $record) {
-                    if ($counter === 0) {
+                    if ($counter === 0 || $record[0] == '') {
                         $counter++;
                         continue;
                     }
 
-                    $dataToInsert[] = [
+                    $dataToInsert = [
                         'sr_no' => $record[0],
                         'date' => null,
                         'academic_year' => $record[2],
@@ -73,12 +75,17 @@ class UploadController extends Controller
                         'fund_transfer_amount' => $record[25],
                         'remarks' => $record[26],
                     ];
+
+                    $dataModel = new TempModel();
+                    $dataModel->fill($dataToInsert);
+                    $dataModel->save();
+
                 }
 
                 // Use Eloquent's insert method to insert multiple records in one go
-                if (!empty($dataToInsert)) {
-                    TempModel::insert($dataToInsert);
-                }
+//                if (!empty($dataToInsert)) {
+//                    TempModel::insert($dataToInsert);
+//                }
 
                 // Provide a response or redirect as needed
                 return response()->json(['message' => 'Data has been imported successfully.']);
