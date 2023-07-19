@@ -20,7 +20,7 @@ Route::get('/', function () {
 
 
 
-Route::get('/upload', [UploadController::class, 'index']);
+Route::get('/', [UploadController::class, 'index']);
 
 Route::post('/upload/process', [UploadController::class, 'processUpload'])->name('upload.process');
 
