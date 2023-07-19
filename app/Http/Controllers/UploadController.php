@@ -6,6 +6,7 @@ use App\Jobs\ProcessCsvFile;
 use App\Models\TempModel;
 use http\Client\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use League\Csv\Reader;
 
@@ -25,12 +26,12 @@ class UploadController extends Controller
 
     public function processUpload(Request $request)
     {
-        if ($request->hasFile('csv_file')) {
+        if ($request->hasFile('file')) {
             ini_set("memory_limit", "-1");
             set_time_limit(0);
 
             try {
-                $file = $request->file('csv_file');
+                $file = $request->file('file');
                 $storePath = $file->move(public_path('csv_upload'), 'test.csv');
                 $reader = Reader::createFromPath(public_path('csv_upload') . "/test.csv", 'r');
                 $records = $reader->getRecords();
@@ -43,15 +44,6 @@ class UploadController extends Controller
                         continue;
                     }
 
-//                    if (!empty($dateString) && $dateString !== '0') {
-//                        $date = \DateTime::createFromFormat('d/m/Y', $dateString);
-//                    }
-//
-//                    if ($record[1] == 0) {
-//                        $date = null;
-//                    } else {
-//                        $date = \DateTime::createFromFormat('YYYY-MM-DD',$record[1]);
-//                    }
                     $dataToInsert[] = [
                         'sr_no' => $record[0],
                         'date' => null,
@@ -99,8 +91,16 @@ class UploadController extends Controller
         return redirect()->back()->with('error', 'No CSV file uploaded.');
     }
 
-    public static function resolveBranchId() {
+    public function upload(Request $request)
+    {
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('uploads', $fileName); // Store the file in the "uploads" folder
+            return response()->json(['success' => true, 'file_name' => $fileName]);
+        }
 
+        return response()->json(['success' => false, 'message' => 'File upload failed.']);
     }
 
 

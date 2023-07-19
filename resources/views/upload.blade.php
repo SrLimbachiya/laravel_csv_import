@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>CSV File Upload</title>
     <style>
         body {
@@ -58,53 +59,47 @@
 </head>
 <body>
 <h1>Upload a CSV File</h1>
-<form method="POST" action="{{ route('process-upload') }}" enctype="multipart/form-data" class="upload-form">
-    @csrf
-    <input type="file" id="csv_file" name="csv_file" accept=".csv" class="upload-input">
-    <button type="button" class="upload-button" id="uploadBtn">Upload</button>
+<form id="upload-form" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" id="fileInput">
+    <button type="submit">Upload</button>
 </form>
-<div id="upload-status"></div>
+<progress id="uploadProgress" value="0" max="100"></progress>
+<div id="status"></div>
 
 <!-- Your other HTML content here -->
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    $(document).ready(function () {
+        $('#upload-form').submit(function (e) {
+            e.preventDefault(); // Prevent the default form submission behavior
 
-    let uploadBtn = document.getElementById('uploadBtn');
+            // Get the CSRF token from the meta tag
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    uploadBtn.addEventListener('click', function (e) {
-        uploadCsvFile(e)
-    });
+            // Get the form data
+            var formData = new FormData(this);
 
+            // Append the CSRF token to the form data
+            formData.append('_token', csrfToken);
 
-    function uploadCsvFile(event) {
-        event.preventDefault();
-
-        let formData = new FormData();
-        let fileInput = document.getElementById('csv_file');
-
-        formData.append('csv_file', fileInput.files[0]);
-
-        // Get the CSRF token
-        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Make the AJAX request
-        fetch('{{ route("process-upload") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken, // Include the CSRF token in the request headers
-            },
-            body: formData,
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response data
-                console.log(data);
-            })
-            .catch(error => {
-                // Handle any errors
-                console.error('Error:', error);
+            // Make the AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '{{ route("upload.process") }}',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    // Handle the success response here
+                    console.log(response);
+                },
+                error: function (error) {
+                    // Handle the error response here
+                    console.log(error.responseJSON);
+                }
             });
-    }
+        });
+    });
 </script>
 
 

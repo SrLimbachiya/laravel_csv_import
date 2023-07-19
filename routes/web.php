@@ -22,11 +22,8 @@ Route::get('/', function () {
 
 Route::get('/upload', [UploadController::class, 'index']);
 
-Route::post('/upload', [UploadController::class, 'processUpload'])->name('process');
+Route::post('/upload/process', [UploadController::class, 'processUpload'])->name('upload.process');
 
-Route::post('/process-upload', [UploadController::class, 'processUpload'])->name('process-upload');
-
-Route::get('/upload-progress', 'UploadController@getUploadProgress');
 
 
 
